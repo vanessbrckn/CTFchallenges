@@ -1,0 +1,79 @@
+List of Challenges and how they were solved given by Cyber Security Professor
+
+Name: Vanessa Bracken
+ASU ID: 1217621743
+
+just-execute-me: I executed the file and was successful.
+
+secure-this-house: I ran the program, and as the "owner" of the
+house I changed the locks. As attacker I inserted the new key
+I called key1. Inserted it, turned it, and then ENTER HOUSE. 
+
+find-that-pass: I was able to scp from my own server to get the 
+network trace. Then I isolated all the HTTP protocols. With help of 
+one of the TA recitations I used the filter http.request.method==POST.
+I found a userid of admin, and decoded the base64 password with the 
+website https://www.base64decode.org/
+
+basic-overflow: This one was tricky for me. I learned tips from the TA 
+recitation on this one as well. but I had a really hard time trying to figure out
+how to correctly make my input string to properly jump to the function "success" in 
+the source code I found using gdb, and disas success. I was getting outputs that 
+were not the hex version so I had to change it to an int. That still didn't work.
+After Arvind told me that endiness matters, which I started to see, I was able
+to find a helpful website https://owasp.org/www-community/attacks/Buffer_overflow_attack
+This gave me the format I should put my address in. *source code in submission*
+
+search: After looking at the code, I realized that it was calling the 
+linux command "find" I had to do some research on that, to start I followed
+https://unix.stackexchange.com/questions/12902/how-to-run-find-exec to see 
+how to run a program I found. I then realized that it was going through 
+multiple times and starting over, and I was not inputing the right thing.
+finally came up with "<username> -exec l33t {} +". I knew I needed "{} +" at the
+end to make sure -exec knew what to execute. the search program kept
+trying to run through the find function for every argument. By putting 
+quotes around the whole thing, I made it one argument. 
+
+read-secret: The first couple tries, I attempted to import the .secret file
+on to my own server, but I didn't have the permissions. Couldn't read
+it of course. but in the code there is a call to open the file in
+~/.secret. '~' = home directory. I remember from lecture being able to 
+change your home directory so I used export HOME=/var/challenge/read-secret
+so that when the file ~/.secret was called it would run no problem, and I 
+could input 'l33t' in the next to execute it.
+
+advanced-overflow: I knew what I had to do for this one since the source code was essentially the same
+as the basic-overflow, but this one was PIE enabled which meant the address of the function I wanted to 
+target would be different. I tried to search for a function I could use that would print the address of the
+pointer DURING run-time, I knew the offset of main() and success(), they were always 0x50 away from 
+eachother. This was proven to be difficult. So at the advice of a classmate, I ended up writing a python
+script that ran my overflow script in a loop. My overflow script had a hard coded address of success which
+I knew it would eventually run into. I ran gdb on the binary file, and printed the address a couple times 
+and found some consistencies:
+
+56|556|5cd
+56|654|5cd
+56|5ee|5cd
+56|632|5cd
+56|576|5cd
+56|5ab|5cd
+
+Because of this, theres only three characters that are changing. I ran dothis.py (found in submission) on 
+overflow2.py (found in submission) and finally got l33t (flag key) to run.
+
+rop-me: To be honest, when I first started all of these challenges, I didn't really know what I was doing, 
+this is especially true for this one. I ran ROPgadget since someone mentioned the tool earlier, and I knew
+there was an assignment called rop-me. duh, so I did. Wasn't sure what I was looking at until Adam went 
+over it in lecture. Realized my rop script was working fine, but the fgets function (which I had a 
+sneaking suspicion was the thing giving me trouble because it reads until \n) was truncaiting my input which 
+has the ascii value for \n. With help from an UTA on piazza, and another student I was told there is an option
+for ROPgadget that would ignore instuctions with certain bytes. I had to do this twice, one function 
+for poping the ebx was giving me trouble so I excludeded those bytes as well. My full rop call was 
+ROPgadget --binary rop-me --badbytes "0a|45" --ropchain > ~/ropIn2.py 
+then when I called ./rop-me I used the pipe trick and used the command
+(cat ~/attack.data ; cat) | ./rop-me 
+then typed in l33t when the shell was popped. 
+
+tidy-up: tty63, dev/pts/63 is me
+
+groups: 
